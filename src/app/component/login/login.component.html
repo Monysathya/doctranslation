@@ -1,0 +1,38 @@
+<div class="absolute left-50 top-50 -translate-50 w-4">
+  <h1 class="text-center title">
+    Team green <br />
+  </h1>
+
+  <form class="mt-5" [formGroup]="loginForm" (submit)="onLogin()" autocomplete="off">
+    <label for="username">Username</label>
+    <input
+      type="email"
+      class="w-full mb-3 mt-2 h-3rem"
+      id="username"
+      name="username"
+      formControlName="username"
+      pInputText
+    />
+
+    <label for="password">Password</label>
+    <input
+      type="password"
+      class="w-full mb-3 mt-2 h-3rem"
+      id="password"
+      name="password"
+      formControlName="password"
+      pInputText
+    />
+
+    <div class="text-center">
+      <button
+        type="submit"
+        pButton
+        label="Connect"
+        class="btn-login h-3rem mt-5"
+        [disabled]="loginForm.invalid"
+        [loading]="isLoading"
+      ></button>
+    </div>
+  </form>
+</div>

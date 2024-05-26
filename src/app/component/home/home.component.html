@@ -1,0 +1,79 @@
+<button pButton class="btn-logout p-button-danger" label="logout" (click)="logout()"></button>
+
+<h1 class="text-center">
+  Translate PowerPoint <span style="color: red">Without</span><br />
+  Breaking the Format
+</h1>
+
+<div class="container">
+  <div class="mt-6">
+    <div>Upload PowerPoint File</div>
+
+    <!-- max upload size 25MB -->
+    <!-- todo: replace `url` and `name` -->
+    <p-fileUpload 
+      mode="basic"
+      chooseLabel="Choose file"
+      chooseIcon="pi pi-upload"
+      name="file[]"
+      accept=".pptx,.ppt"
+      url=""
+      styleClass="mt-2"
+      [maxFileSize]="25000000"
+      (onUpload)="onUpload($event)"
+    ></p-fileUpload>
+  </div>
+
+  <div class="mt-5">
+    <div>Select a Translation Engine</div>
+
+    <p-dropdown 
+      [options]="engines" 
+      [(ngModel)]="selectedEngine" 
+      styleClass="w-full mt-2"
+    ></p-dropdown>
+  </div>
+
+  <div class="mt-5">
+    <div>Translate Image? (OCR)</div>
+
+    <div class="flex flex-column mt-2">
+      <div class="field-checkbox">
+        <p-radioButton 
+          inputId="translateImageYes"
+          name="yes" 
+          [value]="true" 
+          [(ngModel)]="isTranslateImage"
+        ></p-radioButton>
+        <label for="translateImageYes" class="ml-2">Yes</label>
+      </div>
+
+      <div class="field-checkbox">
+        <p-radioButton 
+          inputId="translateImageNo"
+          name="no" 
+          [value]="false" 
+          [(ngModel)]="isTranslateImage"
+        ></p-radioButton>
+        <label for="translateImageNo" class="ml-2">No</label>
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-4">
+    <div>Document Terminology</div>
+    <i class="text-xs text-gray-500">
+      By choosing the right category, our service can better understand context-specific terms and nuances, ensuring a more precise and relevant translation
+    </i>
+
+    <p-dropdown 
+      [options]="terminologies"
+      [(ngModel)]="selectedTerminology"
+      styleClass="w-full mt-2"
+    ></p-dropdown>
+  </div>
+
+  <div class="text-center my-6">
+    <button pButton label="Submit" (click)="submit()"></button>
+  </div>
+</div>
