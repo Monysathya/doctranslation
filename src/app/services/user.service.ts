@@ -1,53 +1,51 @@
 import { Injectable } from '@angular/core';
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpHeaders } from '@angular/common/http';
 
 import { environment } from 'src/environments/environment';
-import { User } from '../models/user';
-import { catchError, first, map } from 'rxjs/operators';
-import { Observable, of } from 'rxjs';
+import { TranslateDto } from '../models/translate';
+import { saveAs } from 'file-saver';
 
 @Injectable({
   providedIn: 'root'
 })
-export class UserService {
+export class TranslateService {
 
   constructor(private http: HttpClient) { }
 
-  getUsers() {
-    return this.http.get<User[]>(`${environment.apiUrl}/v1/users`)
-      .pipe(
-        map((data: any) => data.data),
-        catchError(this.handleError([]))
-      );
+  translate(dto: TranslateDto) {
+    const token = localStorage.getItem('token');
+
+    const headers = new HttpHeaders();
+    headers.append('Authorization', `doctranslation ${token}`);
+    headers.append('Content-Type', 'multipart/form-data');
+
+    // body data
+    const params = new FormData();
+    params.append('file', dto.file);
+    params.append('engine', dto.engine);
+    params.append('is_translate_image', dto.is_translate_image.toString());
+    params.append('source_language', dto.source_language);
+    params.append('target_language', dto.target_language);
+
+    return this.http.post(`${environment.apiUrl}/api/translate/`, params, { headers });
   }
 
-  addUser(user: User) {
-    return this.http.post(`${environment.apiUrl}/v1/users`, user)
-      .pipe(
-        first(),
-        map((data: any) => data.data),
-        catchError(this.handleError(null))
-      );
+  download(id: string, name: string) {
+    this.http
+      .get(`${environment.apiUrl}/api/translate/download/${id}`, { observe: 'response', responseType: 'blob' })
+      .toPromise()
+      .then((response) => this.saveToFileSystem(response, name));
   }
 
-  updateUser(id: number, user: User) {
-    return this.http.put(`${environment.apiUrl}/v1/users/${id}`, { firstName: user.firstName, lastName: user.lastName })
-      .pipe(
-        first(),
-        map((data: any) => data.data),
-        catchError(this.handleError(null))
-      );
-  }
-
-  deleteUser(id: number) {
-    return this.http.delete(`${environment.apiUrl}/v1/users/${id}`);
-  }
-
-  handleError<T>(result?: T) {
-    return (error: any): Observable<T> => {
-      console.error(error);
-
-      return of(result as T);
+  private saveToFileSystem(response: any, name: string) {
+    let filename = name;
+    const contentDispositionHeader: string = response.headers.get('Content-Disposition');
+    if (contentDispositionHeader) {
+      const parts: string[] = contentDispositionHeader.split(';');
+      filename = parts[1].split('=')[1].replace(/^"+|"+$/gm, '');
     }
+
+    const blob = response.body;
+    saveAs(blob, filename);
   }
 }

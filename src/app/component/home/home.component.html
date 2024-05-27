@@ -9,18 +9,14 @@
   <div class="mt-6">
     <div>Upload PowerPoint File</div>
 
-    <!-- max upload size 25MB -->
-    <!-- todo: replace `url` and `name` -->
     <p-fileUpload 
       mode="basic"
       chooseLabel="Choose file"
       chooseIcon="pi pi-upload"
       name="file[]"
       accept=".pptx,.ppt"
-      url=""
       styleClass="mt-2"
-      [maxFileSize]="25000000"
-      (onUpload)="onUpload($event)"
+      (onSelect)="onSelectFile($event)"
     ></p-fileUpload>
   </div>
 
@@ -61,16 +57,31 @@
   </div>
 
   <div class="mt-4">
-    <div>Document Terminology</div>
-    <i class="text-xs text-gray-500">
-      By choosing the right category, our service can better understand context-specific terms and nuances, ensuring a more precise and relevant translation
-    </i>
+    <div class="flex align-items-center gap-3">
+      <div class="w-3">Source language</div>
+      <i class="pi pi-arrow-right" style="visibility: hidden;"></i>
+      <div class="w-3">Target language</div>
+    </div>
 
-    <p-dropdown 
-      [options]="terminologies"
-      [(ngModel)]="selectedTerminology"
-      styleClass="w-full mt-2"
-    ></p-dropdown>
+    <div class="flex align-items-center gap-3">
+      <p-dropdown
+        class="w-3"
+        [options]="languages"
+        [(ngModel)]="sourceLanguage"
+        styleClass="w-full mt-2"
+        (onChange)="onSourceLanguageChanged($event)"
+      ></p-dropdown>
+
+      <i class="pi pi-arrow-right"></i>
+
+      <p-dropdown
+        class="w-3"
+        [options]="languages"
+        [(ngModel)]="targetLanguage"
+        styleClass="w-full mt-2"
+        (onChange)="onTargetLanguageChanged($event)"
+      ></p-dropdown>
+    </div>
   </div>
 
   <div class="text-center my-6">

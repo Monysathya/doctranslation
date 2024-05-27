@@ -12,17 +12,16 @@ export class AuthService {
 
   constructor(private http: HttpClient) { }
 
-  login(username: string, password: string) {
-    return this.http.post(`${environment.apiUrl}/v1/auth/login`, { username, password })
-      .pipe(
-        first(),
-        map((data: any) => data.data),
-        catchError(this.handleError({}))
-      );
+  login(email: string, password: string): Observable<{ result: any, status: string }> {
+    return this.http.post<{ result: any, status: string }>(`${environment.apiUrl}/api/users/sign-in/`, { email, password });
   }
 
   logout() {
-    return this.http.post(`${environment.apiUrl}/v1/auth/logout`, {});
+    return this.http.post(`${environment.apiUrl}/api/users/sign-out/`, {});
+  }
+
+  getUser() {
+    return this.http.get(`${environment.apiUrl}/api/users/me/`);
   }
 
   handleError<T>(result?: T) {

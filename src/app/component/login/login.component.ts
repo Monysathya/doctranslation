@@ -19,7 +19,7 @@ export class LoginComponent implements OnInit {
     private fb: FormBuilder,
   ) {
     this.loginForm = this.fb.group({
-      username: [
+      email: [
         '',
         [
           Validators.required,
@@ -50,19 +50,19 @@ export class LoginComponent implements OnInit {
       return;
     }
 
-    // todo: remove navigate to home here and replace with call api login
-    this.router.navigate(['home']);
+    const { email, password } = this.loginForm.value;
 
-    // todo: replace this code with navigation home above
-    // const { username, password } = this.loginForm.value;
+    this.authService.login(email, password).subscribe((res) => {
+      this.isLoading = false;
+      
+      if (res.status === 'ok') {
+        localStorage.setItem('token', res.result.token);
 
-    // this.authService.login(username, password).subscribe((res) => {
-    //   this.isLoading = false;
+        delete res.result.token;
+        localStorage.setItem('user', res.result);
 
-    //   if (res.token) {
-    //     localStorage.setItem('token', res.token);
-    //     this.router.navigate(['home']);
-    //   }
-    // });
+        this.router.navigate(['home']);
+      }
+    });
   }
 }

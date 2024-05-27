@@ -1,6 +1,9 @@
 import { Component, OnInit } from '@angular/core';
 import { Router } from '@angular/router';
 import { SelectItem } from 'primeng/api';
+import { TranslateDto } from 'src/app/models/translate';
+import { AuthService } from 'src/app/services/auth.service';
+import { TranslateService } from 'src/app/services/user.service';
 
 interface UploadEvent {
   originalEvent: Event;
@@ -13,14 +16,20 @@ interface UploadEvent {
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  file!: File;
   engines: SelectItem[] = [];
-  terminologies: SelectItem[] = [];
-  selectedEngine?: string;
+  languages: SelectItem[] = [];
+  selectedEngine!: string;
   isTranslateImage: boolean = true;
-  selectedTerminology?: string;
+  sourceLanguage!: string;
+  previousSourceLanguage!: string;
+  targetLanguage!: string;
+  previousTargetLanguage!: string;
 
   constructor(
     private router: Router,
+    private authService: AuthService,
+    private translateService: TranslateService,
   ) { }
 
   ngOnInit(): void {
@@ -29,42 +38,68 @@ export class HomeComponent implements OnInit {
 
   initSelectItems(): void {
     this.engines = [
+      { label: 'Google Translate', value: 'google' },
       { label: 'ChatGPT', value: 'chatgpt' },
-      { label: 'Google Translate', value: 'gt' },
+      { label: 'Microsoft Translator', value: 'microsoft' },
+      { label: 'Amazon Translate', value: 'amazon' },
       { label: 'DeepL', value: 'deepl' },
     ];
 
-    this.terminologies = [
-      { label: 'General', value: 'general' },
-      { label: 'Artificial Intelligence (AI) and Machine Learning (ML)', value: 'ai' },
-      { label: 'Data Science and Big Data', value: 'ds' },
-      { label: 'Cybersecurity', value: 'cyber' },
-      { label: 'Software Engineering', value: 'swe' },
-      { label: 'Web Development', value: 'web' },
-      { label: 'Mobile Development', value: 'mobile' },
-      { label: 'Networks and Communications', value: 'network' },
-      { label: 'Robotics', value: 'robotic' },
-      { label: 'Business', value: 'business' },
-      { label: 'Medical', value: 'medical' },
-      { label: 'Financial', value: 'financial' },
-      { label: 'Educational', value: 'educational' },
+    this.languages = [
+      { label: 'English', value: 'en-US', },
+      { label: 'French', value: 'fr-FR', },
     ];
+
+    this.sourceLanguage = 'fr-FR';
+    this.previousSourceLanguage = this.sourceLanguage;
+
+    this.targetLanguage = 'en-US';
+    this.previousTargetLanguage = this.targetLanguage;
   }
 
   logout() {
-    localStorage.clear();
-    this.router.navigate(['auth/login']);
+    this.authService.logout().subscribe((res) => {
+      // localStorage.clear();
+      // this.router.navigate(['auth/login']);
+    });
   }
 
-  onUpload(event: UploadEvent): void {
-    debugger;
+  onSelectFile(event: any): void {
+    this.file = event.currentFiles[0];
+  }
+
+  onSourceLanguageChanged(event: any): void {
+    if (event.value === this.targetLanguage) {
+      this.targetLanguage = this.previousSourceLanguage;
+      this.previousTargetLanguage = this.targetLanguage;
+
+      this.previousSourceLanguage = event.value;
+    }
+  }
+
+  onTargetLanguageChanged(event: any): void {
+    if (event.value === this.sourceLanguage) {
+      this.sourceLanguage = this.previousTargetLanguage;
+      this.previousSourceLanguage = this.sourceLanguage;
+
+      this.previousTargetLanguage = event.value;
+    }
   }
 
   submit(): void {
-    const engine = this.selectedEngine;
-    const isTranslateImage = this.isTranslateImage;
-    const terminology = this.selectedTerminology;
+    const dto: TranslateDto = {
+      file: this.file,
+      engine: this.selectedEngine,
+      is_translate_image: this.isTranslateImage,
+      source_language: this.sourceLanguage,
+      target_language: this.targetLanguage,
+    };
 
-    console.log(engine, isTranslateImage, terminology);
+    this.translateService.translate(dto).subscribe((res: any) => {
+      const hexId = res.document.hexId;
+      const name = res.document.name;
+
+      this.translateService.download(hexId, name);
+    });
   }
 }
