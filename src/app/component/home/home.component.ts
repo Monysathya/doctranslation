@@ -16,6 +16,7 @@ interface UploadEvent {
   styleUrls: ['./home.component.scss']
 })
 export class HomeComponent implements OnInit {
+  isLoading: boolean = false;
   file!: File;
   engines: SelectItem[] = [];
   languages: SelectItem[] = [];
@@ -87,6 +88,8 @@ export class HomeComponent implements OnInit {
   }
 
   submit(): void {
+    this.isLoading = true;
+
     const dto: TranslateDto = {
       file: this.file,
       engine: this.selectedEngine,
@@ -100,6 +103,8 @@ export class HomeComponent implements OnInit {
       const name = res.document.name;
 
       this.translateService.download(hexId, name);
+
+      this.isLoading = false;
     });
   }
 }
